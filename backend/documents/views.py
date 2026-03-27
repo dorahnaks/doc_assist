@@ -47,7 +47,7 @@ def analyze_with_groq(text):
     }}
 
     Document content:
-    {text[:9000]}
+    {text[:20000]}
     """
 
     response = client.chat.completions.create(
