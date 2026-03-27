@@ -41,13 +41,15 @@ def analyze_with_groq(text):
     {{
       "title": "the document title or best guess from content",
       "author": "the author name if found, or 'Not mentioned'",
-      "summary": "a clear 3-5 sentence summary of the document",
+      "summary": "a detailed summary of the document. For short documents write 1 paragraph. 
+      For longer documents write 2-3 paragraphs separated by newline characters. 
+      Each paragraph should cover different aspects: overview, key details, and conclusions or recommendations.",
       "main_points": ["point 1", "point 2", "point 3"],
       "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article)"
     }}
 
     Document content:
-    {text[:20000]}
+    {text[:12000]}
     """
 
     response = client.chat.completions.create(
