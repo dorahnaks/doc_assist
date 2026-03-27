@@ -85,7 +85,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # File upload size limit (10MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 # this is 10MB in bytes
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 # this is 10MB in bytes
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')  
