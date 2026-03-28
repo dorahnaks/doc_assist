@@ -34,28 +34,23 @@ def analyze_with_groq(text):
     client = Groq(api_key=settings.GROQ_API_KEY)
 
     prompt = f"""
-You are a professional document analyst. Analyze the following document and respond ONLY with a valid JSON object.
-Do not include any text outside the JSON. No markdown, no backticks, no code fences.
+You are a professional document analyst. Respond ONLY with a valid JSON object. No markdown, no backticks, no extra text.
 
-The JSON must have exactly these keys:
+Return this exact JSON structure:
 {{
-  "title": "the document title or best guess from content",
-  "author": "the author name if found, or 'Not mentioned'",
-  "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article, Research Paper)",
-  "summary": "Write a structured summary with exactly 3 paragraphs separated by newline characters. Paragraph 1: what the document is about and its purpose. Paragraph 2: the main arguments findings or content. Paragraph 3: conclusions recommendations or final thoughts.",
-  "main_points": [
-    "First key point - be specific and detailed",
-    "Second key point - be specific and detailed",
-    "Third key point - be specific and detailed",
-    "Fourth key point - be specific and detailed",
-    "Fifth key point - be specific and detailed"
-  ],
-  "key_terms": ["important term 1", "important term 2", "important term 3"],
-  "conclusion": "A 2-3 sentence conclusion or final takeaway from the document"
+  "title": "document title",
+  "author": "author name or Not mentioned",
+  "document_type": "type of document",
+  "summary": "Three paragraphs separated by \\n\\n. First paragraph: purpose and overview. Second paragraph: main content and findings. Third paragraph: conclusions.",
+  "main_points": ["point 1", "point 2", "point 3", "point 4", "point 5"],
+  "key_terms": ["term 1", "term 2", "term 3", "term 4", "term 5"],
+  "conclusion": "2-3 sentence final takeaway"
 }}
 
-Document content:
-{text[:12000]}
+Keep each main point under 20 words. Keep each key term under 4 words.
+
+Document:
+{text[:8000]}
 """
 
     response = client.chat.completions.create(
@@ -63,7 +58,7 @@ Document content:
         messages=[
             {
                 "role": "system",
-                "content": "You are a document analyst. You always respond with valid JSON only. Never include markdown, backticks, or any text outside the JSON object."
+                "content": "You are a document analyst. Respond with valid JSON only. No markdown. No backticks. No extra text before or after the JSON."
             },
             {
                 "role": "user",
@@ -71,37 +66,24 @@ Document content:
             }
         ],
         temperature=0.1,
-        max_tokens=2000,
+        max_tokens=1500,
     )
 
     raw = response.choices[0].message.content.strip()
 
-    # Clean up common AI response issues
-    # Remove markdown code fences
+    # Remove markdown code fences if present
     if "```json" in raw:
         raw = raw.split("```json")[1].split("```")[0].strip()
     elif "```" in raw:
         raw = raw.split("```")[1].split("```")[0].strip()
 
-    # Find JSON object if there's extra text
+    # Extract JSON object
     start = raw.find('{')
     end = raw.rfind('}')
     if start != -1 and end != -1:
         raw = raw[start:end+1]
 
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        # Last resort - return a basic structure
-        return {
-            "title": "Document Analysis",
-            "author": "Not mentioned",
-            "document_type": "Document",
-            "summary": raw[:500] if raw else "Could not generate summary.",
-            "main_points": ["Could not extract key points. Please try again."],
-            "key_terms": [],
-            "conclusion": "Analysis incomplete. Please try again."
-        }
+    return json.loads(raw)
 
 
 @api_view(['POST'])

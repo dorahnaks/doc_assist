@@ -198,16 +198,12 @@ export default function App() {
                 <div className="card-label">Summary</div>
                 <div className="summary-text">
                   {result.result.summary
-                    .split('. ')
-                    .reduce((acc, sentence, i, arr) => {
-                      const chunkSize = 3;
-                      if (i % chunkSize === 0) {
-                        acc.push(arr.slice(i, i + chunkSize).join('. ') + '.');
-                      }
-                      return acc;
-                    }, [])
+                    .split('\n\n')
+                    .filter(p => p.trim())
                     .map((paragraph, i) => (
-                      <p key={i}>{paragraph}</p>
+                      <p key={i} style={{ marginBottom: '12px', lineHeight: '1.8', color: '#444', fontSize: '15px' }}>
+                        {paragraph.trim()}
+                      </p>
                     ))
                   }
                 </div>
