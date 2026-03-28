@@ -41,8 +41,8 @@ def analyze_with_groq(text):
     {{
       "title": "the document title or best guess from content",
       "author": "the author name if found, or 'Not mentioned'",
-      "summary": "a clear 3-5 sentence summary of the document",
-      "main_points": ["point 1", "point 2", "point 3"],
+      "summary": "a detailed 6-8 sentence summary covering all major sections of the document",
+    "main_points": ["point 1", "point 2", "point 3", "point 4", "point 5"],
       "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article)"
     }}
 
@@ -51,11 +51,11 @@ def analyze_with_groq(text):
     """
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-    )
-
+    model="llama-3.3-70b-versatile",
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0.3,
+    max_tokens=2000,
+)
     raw = response.choices[0].message.content.strip()
 
     if raw.startswith("```"):
