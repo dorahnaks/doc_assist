@@ -183,7 +183,7 @@ export default function App() {
             </div>
 
             <div className="cards-grid">
-              {/* Document type + title */}
+              {/* Document info */}
               <div className="card card-wide">
                 <div className="card-label">Document</div>
                 <div className="card-badge">{result.result.document_type}</div>
@@ -199,7 +199,7 @@ export default function App() {
                 <p className="card-text">{result.result.summary}</p>
               </div>
 
-              {/* Main points */}
+              {/* Key points */}
               <div className="card card-wide">
                 <div className="card-label">Key points</div>
                 <ul className="points-list">
@@ -211,8 +211,28 @@ export default function App() {
                   ))}
                 </ul>
               </div>
+
+              {/* Key terms */}
+              {result.result.key_terms && (
+                <div className="card card-wide">
+                  <div className="card-label">Key terms</div>
+                  <div className="terms-wrap">
+                    {result.result.key_terms.map((term, i) => (
+                      <span key={i} className="term-badge">{term}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Conclusion */}
+              {result.result.conclusion && (
+                <div className="card card-wide conclusion-card">
+                  <div className="card-label">Conclusion</div>
+                  <p className="card-text">{result.result.conclusion}</p>
+                </div>
+              )}
             </div>
-          </div>
+                      </div>
         )}
       </main>
 

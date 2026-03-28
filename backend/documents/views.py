@@ -34,20 +34,27 @@ def analyze_with_groq(text):
     client = Groq(api_key=settings.GROQ_API_KEY)
 
     prompt = f"""
-    Analyze the following document and respond ONLY with a valid JSON object.
-    Do not include any text outside the JSON. No markdown, no backticks.
+    You are a professional document analyst. Analyze the following document carefully and respond ONLY with a valid JSON object. No markdown, no backticks, no extra text outside the JSON.
 
     The JSON must have exactly these keys:
     {{
-      "title": "the document title or best guess from content",
-      "author": "the author name if found, or 'Not mentioned'",
-      "summary": "a detailed 6-8 sentence summary covering all major sections of the document",
-    "main_points": ["point 1", "point 2", "point 3", "point 4", "point 5"],
-      "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article)"
+    "title": "the document title or best guess from content",
+    "author": "the author name if found, or 'Not mentioned'",
+    "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article, Research Paper)",
+    "summary": "A well-structured summary with clear paragraphs. Start with what the document is about, then cover the main arguments or findings, then end with conclusions or recommendations.",
+    "main_points": [
+        "First key point - be specific and detailed",
+        "Second key point - be specific and detailed",
+        "Third key point - be specific and detailed",
+        "Fourth key point - be specific and detailed",
+        "Fifth key point - be specific and detailed"
+    ],
+    "key_terms": ["important term 1", "important term 2", "important term 3"],
+    "conclusion": "A 2-3 sentence conclusion or final takeaway from the document"
     }}
 
     Document content:
-    {text[:4000]}
+    {text[:12000]}
     """
 
     response = client.chat.completions.create(
