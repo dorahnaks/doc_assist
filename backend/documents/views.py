@@ -28,6 +28,8 @@ def extract_text_from_docx(file):
         return text.strip()
     except Exception as e:
         raise ValueError(f"Could not read Word file: {str(e)}")
+    
+    
 
 
 def analyze_with_groq(text):
@@ -67,6 +69,7 @@ Document:
         ],
         temperature=0.1,
         max_tokens=1500,
+        timeout=60,
     )
 
     raw = response.choices[0].message.content.strip()
@@ -123,8 +126,16 @@ def analyze_document(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # For large documents, take intro, middle and end for better coverage
+    if len(text) > 8000:
+        chunk1 = text[:3000]
+        chunk2 = text[len(text)//2 - 1000 : len(text)//2 + 1000]
+        chunk3 = text[-2000:]
+        text = chunk1 + "\n...\n" + chunk2 + "\n...\n" + chunk3
+
     try:
         result = analyze_with_groq(text)
+        
     except json.JSONDecodeError:
         return Response(
             {'error': 'AI could not parse the document. Please try again.'},

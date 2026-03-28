@@ -52,12 +52,19 @@ export default function App() {
     const formData = new FormData();
     formData.append("file", file);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 90000); // 90 seconds
+
     try {
       const response = await fetch(`${API_URL}/api/analyze/`, {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok) {
@@ -66,7 +73,12 @@ export default function App() {
         setResult(data);
       }
     } catch (err) {
-      setError("Could not connect to the server. Make sure the backend is running.");
+      clearTimeout(timeoutId);
+      if (err.name === "AbortError") {
+        setError("The document is too large and timed out. Try a smaller document or wait and try again.");
+      } else {
+        setError("Could not connect to the server. Please check your connection and try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -158,7 +170,7 @@ export default function App() {
                 disabled={!file || loading}
               >
                 {loading ? (
-                  <><span className="spinner" /> Analyzing...</>
+                  <><span className="spinner" /> Analyzing... please wait</>
                 ) : (
                   "Analyze document"
                 )}
@@ -169,6 +181,11 @@ export default function App() {
                 </button>
               )}
             </div>
+            {loading && (
+              <p style={{ fontSize: '13px', color: '#888', marginTop: '8px' }}>
+                Large documents may take up to 60 seconds to analyze.
+              </p>
+            )}
           </div>
         ) : (
           <div className="results-section">
