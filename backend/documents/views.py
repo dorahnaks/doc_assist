@@ -41,7 +41,8 @@ def analyze_with_groq(text):
     "title": "the document title or best guess from content",
     "author": "the author name if found, or 'Not mentioned'",
     "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article, Research Paper)",
-    "summary": "A well-structured summary with clear paragraphs. Start with what the document is about, then cover the main arguments or findings, then end with conclusions or recommendations.",
+    "summary": "Write a structured summary with exactly 3 paragraphs separated by newlines. Paragraph 1: what the document is about and its purpose. 
+                Paragraph 2: the main arguments, findings or content. Paragraph 3: conclusions, recommendations or final thoughts.",
     "main_points": [
         "First key point - be specific and detailed",
         "Second key point - be specific and detailed",

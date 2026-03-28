@@ -85,8 +85,8 @@ export default function App() {
         <div className="header-inner">
           <div className="logo">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <rect width="28" height="28" rx="8" fill="#4F46E5"/>
-              <path d="M8 8h12M8 12h12M8 16h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <rect width="28" height="28" rx="8" fill="#4F46E5" />
+              <path d="M8 8h12M8 12h12M8 16h8" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
             <span>DocAssist</span>
           </div>
@@ -129,8 +129,8 @@ export default function App() {
                 <div className="drop-hint">
                   <div className="drop-icon">
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                      <path d="M20 8v16M12 16l8-8 8 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M8 28h24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M20 8v16M12 16l8-8 8 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M8 28h24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                   </div>
                   <p className="drop-text">Drop your file here or <span>browse</span></p>
@@ -143,8 +143,8 @@ export default function App() {
             {error && (
               <div className="error-box">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M8 5v4M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M8 5v4M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 {error}
               </div>
@@ -196,7 +196,21 @@ export default function App() {
               {/* Summary */}
               <div className="card card-wide">
                 <div className="card-label">Summary</div>
-                <p className="card-text">{result.result.summary}</p>
+                <div className="summary-text">
+                  {result.result.summary
+                    .split('. ')
+                    .reduce((acc, sentence, i, arr) => {
+                      const chunkSize = 3;
+                      if (i % chunkSize === 0) {
+                        acc.push(arr.slice(i, i + chunkSize).join('. ') + '.');
+                      }
+                      return acc;
+                    }, [])
+                    .map((paragraph, i) => (
+                      <p key={i}>{paragraph}</p>
+                    ))
+                  }
+                </div>
               </div>
 
               {/* Key points */}
@@ -232,7 +246,7 @@ export default function App() {
                 </div>
               )}
             </div>
-                      </div>
+          </div>
         )}
       </main>
 
