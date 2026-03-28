@@ -34,45 +34,74 @@ def analyze_with_groq(text):
     client = Groq(api_key=settings.GROQ_API_KEY)
 
     prompt = f"""
-    You are a professional document analyst. Analyze the following document carefully and respond ONLY with a valid JSON object. No markdown, no backticks, no extra text outside the JSON.
+You are a professional document analyst. Analyze the following document and respond ONLY with a valid JSON object.
+Do not include any text outside the JSON. No markdown, no backticks, no code fences.
 
-    The JSON must have exactly these keys:
-    {{
-    "title": "the document title or best guess from content",
-    "author": "the author name if found, or 'Not mentioned'",
-    "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article, Research Paper)",
-    "summary": "Write a structured summary with exactly 3 paragraphs separated by newlines. Paragraph 1: what the document is about and its purpose. 
-                Paragraph 2: the main arguments, findings or content. Paragraph 3: conclusions, recommendations or final thoughts.",
-    "main_points": [
-        "First key point - be specific and detailed",
-        "Second key point - be specific and detailed",
-        "Third key point - be specific and detailed",
-        "Fourth key point - be specific and detailed",
-        "Fifth key point - be specific and detailed"
-    ],
-    "key_terms": ["important term 1", "important term 2", "important term 3"],
-    "conclusion": "A 2-3 sentence conclusion or final takeaway from the document"
-    }}
+The JSON must have exactly these keys:
+{{
+  "title": "the document title or best guess from content",
+  "author": "the author name if found, or 'Not mentioned'",
+  "document_type": "what kind of document this is (e.g. Report, Essay, Letter, Article, Research Paper)",
+  "summary": "Write a structured summary with exactly 3 paragraphs separated by newline characters. Paragraph 1: what the document is about and its purpose. Paragraph 2: the main arguments findings or content. Paragraph 3: conclusions recommendations or final thoughts.",
+  "main_points": [
+    "First key point - be specific and detailed",
+    "Second key point - be specific and detailed",
+    "Third key point - be specific and detailed",
+    "Fourth key point - be specific and detailed",
+    "Fifth key point - be specific and detailed"
+  ],
+  "key_terms": ["important term 1", "important term 2", "important term 3"],
+  "conclusion": "A 2-3 sentence conclusion or final takeaway from the document"
+}}
 
-    Document content:
-    {text[:12000]}
-    """
+Document content:
+{text[:12000]}
+"""
 
     response = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
-    messages=[{"role": "user", "content": prompt}],
-    temperature=0.3,
-    max_tokens=2000,
-)
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a document analyst. You always respond with valid JSON only. Never include markdown, backticks, or any text outside the JSON object."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.1,
+        max_tokens=2000,
+    )
+
     raw = response.choices[0].message.content.strip()
 
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    raw = raw.strip()
+    # Clean up common AI response issues
+    # Remove markdown code fences
+    if "```json" in raw:
+        raw = raw.split("```json")[1].split("```")[0].strip()
+    elif "```" in raw:
+        raw = raw.split("```")[1].split("```")[0].strip()
 
-    return json.loads(raw)
+    # Find JSON object if there's extra text
+    start = raw.find('{')
+    end = raw.rfind('}')
+    if start != -1 and end != -1:
+        raw = raw[start:end+1]
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        # Last resort - return a basic structure
+        return {
+            "title": "Document Analysis",
+            "author": "Not mentioned",
+            "document_type": "Document",
+            "summary": raw[:500] if raw else "Could not generate summary.",
+            "main_points": ["Could not extract key points. Please try again."],
+            "key_terms": [],
+            "conclusion": "Analysis incomplete. Please try again."
+        }
 
 
 @api_view(['POST'])
